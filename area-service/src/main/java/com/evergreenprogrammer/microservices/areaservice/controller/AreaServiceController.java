@@ -17,6 +17,7 @@ import com.evergreenprogrammer.microservices.areaservice.CircleAreaCalculator;
 import com.evergreenprogrammer.microservices.areaservice.RectangleAreaCalculator;
 import com.evergreenprogrammer.microservices.areaservice.TriangleAreaCalculator;
 import com.evergreenprogrammer.microservices.areaservice.bo.Area;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * @author TapojitBhattacharya
@@ -45,12 +46,20 @@ public class AreaServiceController {
 
 	private Logger logger = LoggerFactory.getLogger(AreaServiceController.class);
 
+	@HystrixCommand(fallbackMethod = "getAreaFallBack")
 	@GetMapping("/area/shapeType/{shapeType}")
 	public Area getArea(@PathVariable String shapeType) {
 		AreaCalculator areaCalculator = getAreaCalculator(shapeType);
 		double area = areaCalculator.calculateArea();
 		int portNo = getServerPort();
 		logger.info("AreaServiceController.getArea.area---> {}" + area);
+		return new Area(area, portNo);
+	}
+
+	public Area getAreaFallBack(@PathVariable String shapeType) {
+		double area = 0;
+		int portNo = getServerPort();
+		logger.info("AreaServiceController.getAreaFallBack.area---> {}" + area);
 		return new Area(area, portNo);
 	}
 

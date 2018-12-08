@@ -17,6 +17,7 @@ import com.evergreenprogrammer.microservices.perimeterservice.PerimeterCalculato
 import com.evergreenprogrammer.microservices.perimeterservice.RectanglePerimeterCalculator;
 import com.evergreenprogrammer.microservices.perimeterservice.TrianglePerimeterCalculator;
 import com.evergreenprogrammer.microservices.perimeterservice.bo.Perimeter;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * @author TapojitBhattacharya
@@ -44,12 +45,20 @@ public class PerimeterServiceController {
 
 	private Logger logger = LoggerFactory.getLogger(PerimeterServiceController.class);
 
+	@HystrixCommand(fallbackMethod = "getPerimeterFallBack")
 	@GetMapping("/perimeter/shapeType/{shapeType}")
 	public Perimeter getPerimeter(@PathVariable String shapeType) {
 		PerimeterCalculator perimeterCalculator = getPerimeterCalculator(shapeType);
 		double perimeter = perimeterCalculator.calculatePerimeter();
 		int portNo = getServerPort();
 		logger.info("PerimeterServiceController.getPerimeter.perimeter---> {}" + perimeter);
+		return new Perimeter(perimeter, portNo);
+	}
+
+	public Perimeter getPerimeterFallBack(@PathVariable String shapeType) {
+		double perimeter = 0;
+		int portNo = getServerPort();
+		logger.info("PerimeterServiceController.getPerimeterFallBack.perimeter---> {}" + perimeter);
 		return new Perimeter(perimeter, portNo);
 	}
 
