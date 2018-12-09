@@ -18,6 +18,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RestController
 public class DimensionController {
 
+	
 	@Autowired
 	private Dimension dimension;
 
